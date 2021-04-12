@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+    prometheus:
+        image: prom/prometheus:main
+        hostname: magero-prometheus
+        container_name: magero-prometheus
+        networks: 
+            - promscale-timescaledb
+        ports:
+            - "9090:9090"
+        volumes:
+            - $PWD/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+    timescaledb:
+        image: timescaledev/promscale-extension:0.1.2-ts1-pg12
+        hostname: magero-timescaledb
+        container_name: magero-timescaledb
+        networks: 
+            - promscale-timescaledb
+        env_file:
+            - $PWD/config/timescaledb.env
+        ports:
+            - "5432:5432"
+    
+    promscale:
+        image: timescale/promscale:0.3
+        hostname: magero-promscale
+        container_name: magero-promscale
+        networks: 
+            - promscale-timescaledb
+        env_file:
+            - $PWD/config/promscale.env
+        depends_on:
+            - timescaledb
+            - prometheus
+        ports:
+            - "9201:9201"
+
+networks: 
+    promscale-timescaledb:
+        driver: bridge
