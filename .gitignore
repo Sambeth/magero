@@ -1,4 +1,7 @@
 *.class
 *.log
+.idea/
 config/promscale.env
 config/timescaledb.env
+config/*.key
+.DS_Store

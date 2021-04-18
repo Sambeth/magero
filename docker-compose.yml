@@ -5,10 +5,14 @@ services:
         image: prom/prometheus:main
         hostname: magero-prometheus
         container_name: magero-prometheus
-        networks: 
+        networks:
             - promscale-timescaledb
         ports:
             - "9090:9090"
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--web.enable-admin-api'
+            - '--web.enable-lifecycle'
         volumes:
             - $PWD/prometheus.yml:/etc/prometheus/prometheus.yml:ro
 
@@ -16,7 +20,7 @@ services:
         image: timescaledev/promscale-extension:0.1.2-ts1-pg12
         hostname: magero-timescaledb
         container_name: magero-timescaledb
-        networks: 
+        networks:
             - promscale-timescaledb
         env_file:
             - $PWD/config/timescaledb.env
@@ -27,7 +31,7 @@ services:
         image: timescale/promscale:0.3
         hostname: magero-promscale
         container_name: magero-promscale
-        networks: 
+        networks:
             - promscale-timescaledb
         env_file:
             - $PWD/config/promscale.env
@@ -39,6 +43,20 @@ services:
         ports:
             - "9201:9201"
 
-networks: 
+    grafana:
+        image: grafana/grafana:7.5.4
+        hostname: magero-grafana
+        container_name: magero-grafana
+        networks:
+            - promscale-timescaledb
+        ports:
+            - "3000:3000"
+        volumes:
+            - magero-grafana:/var/lib/grafana
+
+networks:
     promscale-timescaledb:
         driver: bridge
+
+volumes:
+    magero-grafana:
